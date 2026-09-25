@@ -2,10 +2,17 @@
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#010101">
+  <meta name="description" content="Work Until Everyday — game pixel art kantor isometrik Dlicom. Own your social.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Work Until Everyday">
   <title>Work Until Everyday — Dlicom</title>
-  <link rel="icon" href="assets/dlicom-logo.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,62 +27,105 @@
         <span class="combo" id="hud-combo"></span>
       </div>
       <div class="hud-group">
+        <span class="coins" id="hud-coins" title="Koin">0</span>
         <span class="hearts" id="hud-hearts" aria-label="Reputasi"></span>
         <span class="energy" title="Energi"><span id="hud-energy"></span></span>
+      </div>
+      <div class="hud-group buttons">
+        <button class="icon-btn wide" id="btn-quests" aria-label="Quest">QUEST <b id="hud-qcount">0/3</b></button>
+        <button class="icon-btn" id="btn-zoom" aria-label="Zoom kamera">⌕</button>
+        <button class="icon-btn" id="btn-full" aria-label="Layar penuh">⛶</button>
         <button class="icon-btn" id="btn-mute" aria-label="Suara">♪</button>
         <button class="icon-btn" id="btn-pause" aria-label="Jeda">❚❚</button>
       </div>
     </header>
 
     <div id="stage">
-      <canvas id="game" aria-label="Kantor Dlicom"></canvas>
+      <div id="viewport"><canvas id="game" aria-label="Kantor Dlicom"></canvas></div>
 
-      <section class="overlay" id="scr-title">
-        <div class="panel">
-          <img class="logo" src="assets/dlicom-logo.png" alt="Dlicom" width="56" height="56">
-          <h1>WORK UNTIL<br><span>EVERYDAY</span></h1>
-          <p class="tag">Own your social.</p>
-          <p class="pick-label">Pilih karakter</p>
-          <div class="pick" id="pick" role="radiogroup"></div>
-          <button class="btn primary" id="btn-start">MULAI KERJA ▶</button>
-          <ul class="howto">
-            <li><b>Gerak:</b> WASD / panah, atau klik / tap lantai</li>
-            <li><b>Kerja:</b> berdiri di cubicle yang ada <i class="dot o"></i> gelembung sampai selesai</li>
-            <li><b>Print:</b> ambil kertas di mesin fotokopi, antar ke cubicle</li>
-            <li><b>Capek?</b> isi energi di water cooler <i class="dot c"></i></li>
-            <li>Tugas telat = reputasi −1 ♥. Hari tanpa telat = +1 ♥</li>
-          </ul>
-          <p class="best" id="best-title"></p>
-        </div>
-      </section>
+      <aside id="quest-panel" hidden>
+        <div class="qp-head"><b>QUEST HARI INI</b><span class="rank" id="qp-rank"></span></div>
+        <ol id="quest-list"></ol>
+      </aside>
 
-      <section class="overlay" id="scr-pause" hidden>
-        <div class="panel small">
-          <h2>ISTIRAHAT</h2>
-          <button class="btn primary" id="btn-resume">LANJUT ▶</button>
-          <button class="btn" id="btn-quit">KE MENU</button>
-        </div>
-      </section>
+      <div id="tutor" hidden>
+        <div class="tutor-step" id="tutor-step">1/5</div>
+        <div class="tutor-body"><b id="tutor-title"></b><span id="tutor-text"></span></div>
+        <button class="btn tiny" id="btn-skip-tut">LEWATI</button>
+      </div>
 
-      <section class="overlay" id="scr-dayend" hidden>
-        <div class="panel small">
-          <h2 id="dayend-title">17:00 — PULANG!</h2>
-          <dl class="stats" id="dayend-stats"></dl>
-          <p class="perfect" id="dayend-perfect" hidden>Tanpa telat! +1 ♥</p>
-          <button class="btn primary" id="btn-next">HARI BERIKUTNYA ▶</button>
-        </div>
-      </section>
+      <div id="toasts" aria-live="polite"></div>
 
-      <section class="overlay" id="scr-over" hidden>
-        <div class="panel small">
-          <h2 class="bad">BURNOUT!</h2>
-          <p>Reputasi habis. Besok coba lagi ya.</p>
-          <dl class="stats" id="over-stats"></dl>
-          <button class="btn primary" id="btn-retry">MAIN LAGI ▶</button>
-          <button class="btn" id="btn-menu">KE MENU</button>
-        </div>
-      </section>
+      <div id="joy" hidden aria-hidden="true"><div class="knob"></div></div>
     </div>
+
+    <section class="overlay" id="scr-title">
+      <div class="panel">
+        <img class="logo" src="assets/dlicom-logo.png" alt="Dlicom" width="56" height="56">
+        <h1>WORK UNTIL<br><span>EVERYDAY</span></h1>
+        <p class="tag">Own your social.</p>
+        <p class="pick-label">Pilih karakter</p>
+        <div class="pick" id="pick" role="radiogroup"></div>
+        <button class="btn primary" id="btn-start">MULAI KERJA ▶</button>
+        <div class="row">
+          <button class="btn" id="btn-tutorial">TUTORIAL</button>
+          <button class="btn" id="btn-howto">CARA MAIN</button>
+        </div>
+        <p class="best" id="best-title"></p>
+        <p class="hint-install" id="hint-install" hidden>Tip: pakai “Tambahkan ke Layar Utama” biar main layar penuh di HP.</p>
+      </div>
+    </section>
+
+    <section class="overlay" id="scr-howto" hidden>
+      <div class="panel wide">
+        <h2>CARA MAIN</h2>
+        <div class="howto-grid" id="howto-grid"></div>
+        <button class="btn primary" id="btn-howto-close">MENGERTI ▶</button>
+      </div>
+    </section>
+
+    <section class="overlay" id="scr-pause" hidden>
+      <div class="panel small">
+        <h2>ISTIRAHAT</h2>
+        <ol class="quest-summary" id="pause-quests"></ol>
+        <button class="btn primary" id="btn-resume">LANJUT ▶</button>
+        <button class="btn" id="btn-pause-howto">CARA MAIN</button>
+        <button class="btn" id="btn-quit">KE MENU</button>
+      </div>
+    </section>
+
+    <section class="overlay" id="scr-dayend" hidden>
+      <div class="panel">
+        <h2 id="dayend-title">17:00 — PULANG!</h2>
+        <dl class="stats" id="dayend-stats"></dl>
+        <p class="perfect" id="dayend-perfect" hidden>Tanpa telat! +1 ♥</p>
+        <h3>QUEST</h3>
+        <ol class="quest-summary" id="dayend-quests"></ol>
+        <div class="career" id="dayend-career"></div>
+        <h3>TOKO KANTOR <span class="coins" id="shop-coins">0</span></h3>
+        <div class="shop" id="shop"></div>
+        <button class="btn primary" id="btn-next">HARI BERIKUTNYA ▶</button>
+      </div>
+    </section>
+
+    <section class="overlay" id="scr-over" hidden>
+      <div class="panel small">
+        <h2 class="bad">BURNOUT!</h2>
+        <p>Reputasi habis. Besok coba lagi ya.</p>
+        <dl class="stats" id="over-stats"></dl>
+        <button class="btn primary" id="btn-retry">MAIN LAGI ▶</button>
+        <button class="btn" id="btn-menu">KE MENU</button>
+      </div>
+    </section>
+
+    <section class="overlay" id="scr-rotate" hidden>
+      <div class="panel small">
+        <div class="rotate-icon" aria-hidden="true">⟳</div>
+        <h2>PUTAR HP-MU</h2>
+        <p>Mode landscape bikin kantornya lebih besar. Atau tetap main di portrait dengan kamera zoom.</p>
+        <button class="btn primary" id="btn-rotate-ok">TETAP MAIN</button>
+      </div>
+    </section>
   </main>
   <script type="module" src="src/main.js"></script>
 </body>

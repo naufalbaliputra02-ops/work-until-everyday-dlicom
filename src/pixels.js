@@ -67,6 +67,37 @@ const DROP = [
 
 const ARROW = ["OOOOOOO", ".OWWWO.", "..OWO..", "...O..."];
 
+const BIG_ARROW = [
+  "OOOOOOOOO",
+  "OWWWWWWWO",
+  ".OWWWWWO.",
+  "..OWWWO..",
+  "...OWO...",
+  "....O....",
+];
+
+const CUP = [
+  "..S.S...",
+  "...S.S..",
+  "OOOOOOO.",
+  "OWWWWWOO",
+  "OCCCCCO.O",
+  "OWWWWWOO",
+  ".OWWWO..",
+  "..OOO...",
+];
+
+const COIN = [
+  ".OOOO.",
+  "OYYYWO",
+  "OYDYYO",
+  "OYDYYO",
+  "OYYYYO",
+  ".OOOO.",
+];
+
+const SPARK = ["..W..", ".WYW.", "WYYYW", ".WYW.", "..W.."];
+
 export function bubbleIcon(color) {
   return fromAscii(BUBBLE, { O: "#0a1041", C: color, W: "#ffffff", K: "#0a0a14" });
 }
@@ -74,6 +105,23 @@ export const paperIcon = () => fromAscii(PAPER, { O: "#2b2a33", W: "#f4f1ea", K:
 export const printerIcon = () => fromAscii(PRINTER, { O: "#2b2a33", W: "#f4f1ea", C: "#cbc4b0", G: "#5bd36b", K: "#8b93b8" });
 export const dropIcon = () => fromAscii(DROP, { O: "#0a1041", C: "#67c6dd", W: "#e6fbff" });
 export const arrowIcon = (color) => fromAscii(ARROW, { O: "#0a1041", W: color });
+export const bigArrowIcon = (color) => fromAscii(BIG_ARROW, { O: "#0a1041", W: color });
+export const cupIcon = () => fromAscii(CUP, { O: "#2b1a10", W: "#f4f1ea", C: "#7a4a24", S: "#e6e6f0" });
+export const coinIcon = () => fromAscii(COIN, { O: "#5a3a05", Y: "#ffcf3a", D: "#c98a10", W: "#fff6c8" });
+export const sparkIcon = () => fromAscii(SPARK, { W: "#ffffff", Y: "#ffcf3a" });
+/** Gold "viral" bubble with a flame-orange rim. */
+export const viralIcon = () => fromAscii(BUBBLE, { O: "#c8102e", C: "#fff15a", W: "#ffffff", K: "#0a0a14" });
+
+/** Copy a (cached) pixel icon into a fresh canvas scaled up for DOM use. */
+export function iconCanvas(icon, scale = 3) {
+  const c = document.createElement("canvas");
+  c.width = icon.width * scale; c.height = icon.height * scale;
+  const ctx = c.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(icon, 0, 0, c.width, c.height);
+  c.className = "px-icon";
+  return c;
+}
 
 const GLYPHS = {
   0: ["###", "#.#", "#.#", "#.#", "###"],

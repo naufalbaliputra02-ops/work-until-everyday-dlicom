@@ -1,6 +1,8 @@
 import { depthSort, objectBBox, project, screenBBox, unproject } from "./iso.js";
-import { DAY_SECONDS, TASK_TYPES, inRect } from "./game.js";
-import { arrowIcon, bubbleIcon, dropIcon, paperIcon, pixelText, printerIcon } from "./pixels.js";
+import { DAY_SECONDS, PRINT_TIME, TASK_TYPES, TUTORIAL_STEPS, inRect } from "./game.js";
+import {
+  arrowIcon, bigArrowIcon, bubbleIcon, cupIcon, dropIcon, paperIcon, pixelText, printerIcon, sparkIcon, viralIcon,
+} from "./pixels.js";
 
 export function createRenderer(canvas, level, images) {
   const ctx = canvas.getContext("2d");
@@ -66,6 +68,24 @@ export function createRenderer(canvas, level, images) {
     if (a.facing < 0) ctx.scale(-1, 1);
     ctx.drawImage(images.mascots, frame * w, row * h, w, h, -w / 2, 0, w, h);
     ctx.restore();
+    if (isPlayer && g.boost > 0) {
+      const k = Math.floor(g.time * 10);
+      const sp = sparkIcon();
+      const ang = k * 0.9;
+      const r = 9;
+      ctx.drawImage(sp, Math.round(sx + Math.cos(ang) * r - 2), Math.round(sy - 10 + Math.sin(ang) * 5 - 2));
+    }
+  }
+
+  function drawCoffee(g, c) {
+    const [sx, sy] = project(o, c.x, c.y, 0);
+    const blink = c.ttl < 4 && Math.floor(g.time * 8) % 2;
+    ctx.fillStyle = "rgba(26,22,40,0.45)";
+    ctx.fillRect(sx - 4, sy - 1, 8, 2);
+    if (blink) return;
+    const icon = cupIcon();
+    const bob = Math.floor(g.time * 3) % 2;
+    ctx.drawImage(icon, Math.round(sx - icon.width / 2), sy - icon.height - 2 - bob);
   }
 
   function iconAt(img, wx, wy, wz, dy = 0) {
@@ -109,8 +129,12 @@ export function createRenderer(canvas, level, images) {
     // world sprites
     const actors = [...g.npcs.map((n) => ({ a: n, player: false })), { a: p, player: true }]
       .map(({ a, player }) => ({ box: [a.x - 3, a.x + 3, a.y - 3, a.y + 3, 0, 16], actor: a, player }));
-    for (const it of depthSort(o, [...statics, ...actors])) {
+    const extra = playing && g.coffee
+      ? [{ box: [g.coffee.x - 2, g.coffee.x + 2, g.coffee.y - 2, g.coffee.y + 2, 0, 8], coffee: g.coffee }]
+      : [];
+    for (const it of depthSort(o, [...statics, ...actors, ...extra])) {
       if (it.actor) drawActor(g, it.actor, it.player);
+      else if (it.coffee) drawCoffee(g, it.coffee);
       else ctx.drawImage(images.objects, it.src[0], it.src[1], it.src[2], it.src[3], it.at[0], it.at[1], it.src[2], it.src[3]);
     }
 
@@ -124,9 +148,14 @@ export function createRenderer(canvas, level, images) {
         const urgent = f < 0.25 && Math.floor(g.time * 8) % 2;
         let icon;
         if (t.kind === "print") icon = t.printed ? paperIcon() : printerIcon();
+        else if (t.viral) icon = viralIcon();
         else icon = bubbleIcon(colorOf(TASK_TYPES[t.kind].color));
         if (!urgent) {
           const [sx, sy] = iconAt(icon, x, y, z + 8, -bounce);
+          if (t.viral && Math.floor(g.time * 4) % 2) {
+            const sp = sparkIcon();
+            ctx.drawImage(sp, Math.round(sx + 6), Math.round(sy - 14));
+          }
           bar(sx, sy + 2, 14, f, patienceColor(f));
           if (t.progress > 0) bar(sx, sy + 6, 14, t.progress / TASK_TYPES[t.kind].work, "#ffffff");
         } else {
@@ -138,12 +167,13 @@ export function createRenderer(canvas, level, images) {
       if (printJob && p.carrying === null) {
         const [x, y, z] = level.copier.icon;
         const [sx, sy] = iconAt(paperIcon(), x, y, z, -(Math.floor(g.time * 3) % 2));
-        if (g.copierProgress > 0) bar(sx, sy + 2, 14, g.copierProgress / 1.1, "#ffffff");
+        if (g.copierProgress > 0) bar(sx, sy + 2, 14, g.copierProgress / PRINT_TIME, "#ffffff");
       }
       if (g.energy < 35) {
         const [x, y, z] = level.cooler.icon;
         iconAt(dropIcon(), x, y, z, -(Math.floor(g.time * 3) % 2));
       }
+      if (g.tutorial) drawTutorialPointer(g);
 
       // player marker + carried paper
       const head = project(o, p.x, p.y, 20);
@@ -157,6 +187,7 @@ export function createRenderer(canvas, level, images) {
       if (p.working === "cooler") {
         bar(head[0], head[1] - 8, 14, g.energy / 100, brand.cyan);
       }
+      if (g.boost > 0) bar(head[0], head[1] + 2, 12, g.boost / 12, "#f5a623");
     }
 
     for (const f of g.fx) {
@@ -173,6 +204,28 @@ export function createRenderer(canvas, level, images) {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
     }
+  }
+
+  function tutorialGoal(g) {
+    const goal = TUTORIAL_STEPS[g.tutorial.step]?.goal;
+    const p = g.player;
+    if (goal === "task" || (goal === "copier" && p.carrying !== null)) {
+      const t = g.tasks[0];
+      return t ? level.cubicles[t.cubicle].screen.slice(0, 2).concat(62) : null;
+    }
+    if (goal === "copier") return [level.copier.icon[0], level.copier.icon[1], 44];
+    if (goal === "cooler") return [level.cooler.icon[0], level.cooler.icon[1], 56];
+    if (goal === "coffee" && g.coffee) return [g.coffee.x, g.coffee.y, 22];
+    return null;
+  }
+
+  function drawTutorialPointer(g) {
+    const at = tutorialGoal(g);
+    if (!at) return;
+    const icon = bigArrowIcon("#ffe27a");
+    const bob = Math.round(Math.abs(Math.sin(g.time * 5)) * 4);
+    const [sx, sy] = project(o, at[0], at[1], at[2]);
+    ctx.drawImage(icon, Math.round(sx - icon.width / 2), sy - icon.height - bob);
   }
 
   function toWorld(clientX, clientY) {

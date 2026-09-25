@@ -30,30 +30,38 @@ M_WALL = Mat(top=hex2rgb(A.WALL_CAP), left=hex2rgb("#7a7268"), right=hex2rgb("#6
 
 WOOD_ZONE = (0, 76, 40, WY)  # lounge floor: x0, x1, y0, y1
 RUG = (26, 70)  # 48x48 logo rug origin
+MARGIN = 14
+
+# cubicle farm: 2 rows x 3 pods, each pod accented with a brand colour
+CUBICLES = [
+    {"x": 80 + k * 48, "y": y, "accent": accent, "screen": screen, "mug": mug, "right_wall": k == 2}
+    for y, pods in [
+        (48, [(A.BRAND_BLUE, "logo", A.BRAND_ORANGE), (A.BRAND_MAGENTA, "code", None), (A.BRAND_ORANGE, "chat", A.BRAND_MAGENTA)]),
+        (136, [(A.BRAND_CYAN, "logo", None), (A.BRAND_VIOLET, "off", A.BRAND_BLUE), (A.BRAND_ORANGE, "code", A.BRAND_CYAN)]),
+    ]
+    for k, (accent, screen, mug) in enumerate(pods)
+]
+MASCOT_SPOTS = {"blue": (26, 16), "orange": (72, 22), "pink": (44, 116)}
 
 
 # --------------------------------------------------------------------------
-def room_items():
+def room_items(include_mascots=True):
     it = []
     # back corner: the water cooler, with Blue hanging out beside it
     it.append(O.water_cooler(4, 4))
-    it.append(O.mascot("blue", 26, 16))
+    if include_mascots:
+        it.append(O.mascot("blue", *MASCOT_SPOTS["blue"]))
     # filing cabinets under the "Own your social" banner, Orange on files duty
     for i in range(5):
         it.append(O.filing_cabinet(36 + i * 14, 0))
-    it.append(O.mascot("orange", 72, 22))
+    if include_mascots:
+        it.append(O.mascot("orange", *MASCOT_SPOTS["orange"]))
     it.append(O.plant(114, 4, "bush"))
     it.append(O.plant(240, 6, "tall"))
     it.append(O.copier(226, 44))
 
-    # cubicle farm: 2 rows x 3 pods, each pod accented with a brand colour
-    rows = [
-        (48, [(A.BRAND_BLUE, "logo", A.BRAND_ORANGE), (A.BRAND_MAGENTA, "code", None), (A.BRAND_ORANGE, "chat", A.BRAND_MAGENTA)]),
-        (136, [(A.BRAND_CYAN, "logo", None), (A.BRAND_VIOLET, "off", A.BRAND_BLUE), (A.BRAND_ORANGE, "code", A.BRAND_CYAN)]),
-    ]
-    for y, pods in rows:
-        for k, (accent, screen, mug) in enumerate(pods):
-            it += O.cubicle(80 + k * 48, y, accent, screen, right_wall=(k == 2), mug_color=mug)
+    for c in CUBICLES:
+        it += O.cubicle(c["x"], c["y"], c["accent"], c["screen"], right_wall=c["right_wall"], mug_color=c["mug"])
     it.append(O.plant(234, 110, "bush"))
     it.append(O.plant(238, 204, "bush"))
     it.append(O.plant(186, 106, "tall", 6))
@@ -61,7 +69,8 @@ def room_items():
     # lounge: couch, logo rug, coffee table, Pink in shades
     it.append(O.couch(2, 60, 64))
     it.append(O.coffee_table(22, 136, 20, 20))
-    it.append(O.mascot("pink", 44, 116))
+    if include_mascots:
+        it.append(O.mascot("pink", *MASCOT_SPOTS["pink"]))
     it.append(O.plant(4, 46, "bush"))
     it.append(O.plant(4, 206, "tall"))
     return it
@@ -113,19 +122,26 @@ def brand_background(size) -> Image.Image:
     return img
 
 
-def render_scene() -> Image.Image:
-    margin = 14
-    ox = margin + THICK + WY
-    oy = margin + THICK + WALL_H + 4
-    w = (WX + THICK) + (WY + THICK) + margin * 2
-    h = oy + (WX + WY) // 2 + SLAB + margin
-    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    iso = Iso(img, ox, oy)
+def scene_frame():
+    """(width, height, origin_x, origin_y) of the scene canvas."""
+    ox = MARGIN + THICK + WY
+    oy = MARGIN + THICK + WALL_H + 4
+    w = (WX + THICK) + (WY + THICK) + MARGIN * 2
+    h = oy + (WX + WY) // 2 + SLAB + MARGIN
+    return w, h, ox, oy
 
+
+def new_canvas():
+    w, h, ox, oy = scene_frame()
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    return img, Iso(img, ox, oy)
+
+
+def render_room_base(iso: Iso, items):
+    """Everything that never moves or occludes: slab, floor, shadows, walls."""
     iso.box(-THICK, -THICK, -SLAB, WX + THICK, WY + THICK, SLAB, M_SLAB)
     iso.plane_z(A.floor_texture(WX, WY, WOOD_ZONE), 0, 0, 0)
     iso.plane_z(A.logo_rug(48), *RUG, 0)
-    items = room_items()
     draw_shadows(iso, items)
 
     iso.box(-THICK, -THICK, 0, WX + THICK, THICK, WALL_H, M_WALL)
@@ -134,6 +150,11 @@ def render_scene() -> Image.Image:
     iso.plane_x(A.wall_texture(WY, WALL_H), 0, 0, WALL_H)
     wall_decor(iso)
 
+
+def render_scene() -> Image.Image:
+    img, iso = new_canvas()
+    items = room_items()
+    render_room_base(iso, items)
     for it in depth_sort(iso, items):
         it.draw(iso)
     return img
@@ -217,20 +238,30 @@ def tileset_pieces():
     ]
 
 
-def build_tileset(out_dir: Path):
-    pieces = [(n, *_render_piece(fn)) for n, fn in tileset_pieces()]
-    sheet_w, pad = 400, 4
+def shelf_pack(sizes, sheet_w, pad=4):
+    """Pack (w, h) rects in order onto shelves; returns positions + height."""
     x = y = pad
     shelf = 0
-    frames = {}
-    for name, img, anchor in pieces:  # shelf packing in authoring order
-        if x + img.width + pad > sheet_w:
+    pos = []
+    for w, h in sizes:
+        if x + w + pad > sheet_w:
             x, y, shelf = pad, y + shelf + pad, 0
-        frames[name] = {"x": x, "y": y, "w": img.width, "h": img.height,
-                        "anchor": {"x": anchor[0], "y": anchor[1]}}
-        x += img.width + pad
-        shelf = max(shelf, img.height)
-    sheet = Image.new("RGBA", (sheet_w, y + shelf + pad), (0, 0, 0, 0))
+        pos.append((x, y))
+        x += w + pad
+        shelf = max(shelf, h)
+    return pos, y + shelf + pad
+
+
+def build_tileset(out_dir: Path):
+    pieces = [(n, *_render_piece(fn)) for n, fn in tileset_pieces()]
+    sheet_w = 400
+    pos, sheet_h = shelf_pack([img.size for _, img, _ in pieces], sheet_w)
+    frames = {
+        name: {"x": x, "y": y, "w": img.width, "h": img.height,
+               "anchor": {"x": anchor[0], "y": anchor[1]}}
+        for (name, img, anchor), (x, y) in zip(pieces, pos)
+    }
+    sheet = Image.new("RGBA", (sheet_w, sheet_h), (0, 0, 0, 0))
     tiles_dir = out_dir / "tiles"
     tiles_dir.mkdir(parents=True, exist_ok=True)
     for old in tiles_dir.glob("*.png"):
@@ -255,6 +286,87 @@ def build_tileset(out_dir: Path):
 
 def upscale(img: Image.Image, k: int) -> Image.Image:
     return img.resize((img.width * k, img.height * k), Image.Resampling.NEAREST)
+
+
+# --------------------------------------------------------------------------
+# Game export: static background + one sprite per occluding object + level data
+# --------------------------------------------------------------------------
+GAME = A.ROOT / "game" / "assets"
+
+
+def build_game_assets(out_dir: Path):
+    out_dir.mkdir(parents=True, exist_ok=True)
+    w, h, ox, oy = scene_frame()
+    items = room_items(include_mascots=False)
+
+    base, iso = new_canvas()
+    render_room_base(iso, items)
+    room = brand_background((w, h))
+    room.alpha_composite(base)
+    room.save(out_dir / "room.png")
+
+    sprites = []
+    for it in depth_sort(iso, items):  # authoring order = a valid static order
+        img, piso = new_canvas()
+        it.draw(piso)
+        bb = img.getbbox()
+        if bb:
+            sprites.append((it, img.crop(bb), bb))
+    pos, sheet_h = shelf_pack([s.size for _, s, _ in sprites], 512, pad=1)
+    sheet = Image.new("RGBA", (512, sheet_h), (0, 0, 0, 0))
+    objects = []
+    for (it, spr, bb), (x, y) in zip(sprites, pos):
+        sheet.alpha_composite(spr, (x, y))
+        objects.append({
+            "name": it.name,
+            "box": list(it.box),
+            "src": [x, y, spr.width, spr.height],
+            "at": [bb[0], bb[1]],
+            "solid": it.box[4] == 0,
+        })
+    sheet.save(out_dir / "objects.png")
+
+    names = ["blue", "pink", "orange"]
+    fw, fh = A.mascot("blue").size
+    ms = Image.new("RGBA", (fw * len(A.MASCOT_FRAMES), fh * len(names)), (0, 0, 0, 0))
+    for r, n in enumerate(names):
+        for c, f in enumerate(A.MASCOT_FRAMES):
+            ms.alpha_composite(A.mascot(n, f), (c * fw, r * fh))
+    ms.save(out_dir / "mascots.png")
+    upscale(ms, 4).save(out_dir / "mascots@4x.png")
+
+    for src in ("dlicom-logo.png", "dlicom-banner.png"):
+        (out_dir / src).write_bytes((A.BRAND / src).read_bytes())
+
+    cubicles = [
+        {
+            "id": i,
+            "accent": c["accent"],
+            # walkable interior in front of the L-desk
+            "zone": [c["x"] + 16, c["y"] + 16, c["x"] + 48, c["y"] + 48],
+            "screen": [c["x"] + 24, c["y"] + 8, 30],
+        }
+        for i, c in enumerate(CUBICLES)
+    ]
+    level = {
+        "canvas": {"w": w, "h": h},
+        "origin": {"x": ox, "y": oy},
+        "world": {"w": WX, "h": WY},
+        "objects": objects,
+        "cubicles": cubicles,
+        "cooler": {"zone": [0, 0, 26, 26], "icon": [10, 9, 38]},
+        "copier": {"zone": [214, 34, 256, 72], "icon": [236, 52, 26]},
+        "spawns": {k: list(v) for k, v in MASCOT_SPOTS.items()},
+        "pois": [[24, 20], [60, 22], [100, 30], [44, 100], [50, 190], [150, 116], [200, 124],
+                 [236, 76], [244, 160], [120, 206], [200, 208]]
+                + [[c["x"] + 38, c["y"] + 40] for c in CUBICLES],
+        "mascots": {"names": names, "frames": A.MASCOT_FRAMES, "w": fw, "h": fh},
+        "brand": {"black": A.BRAND_BLACK, "navy": A.BRAND_NAVY, "blue": A.BRAND_BLUE,
+                  "royal": A.BRAND_ROYAL, "cyan": A.BRAND_CYAN, "violet": A.BRAND_VIOLET,
+                  "magenta": A.BRAND_MAGENTA, "orange": A.BRAND_ORANGE, "cream": A.BRAND_CREAM},
+    }
+    (out_dir / "level.json").write_text(json.dumps(level, indent=1) + "\n")
+    return level
 
 
 def write_gallery(out_dir: Path, frames: dict, scene_w: int):
@@ -308,7 +420,9 @@ def main():
     upscale(sheet, 3).save(DIST / "tileset@3x.png")
     frames = json.loads((DIST / "tileset.json").read_text())["frames"]
     write_gallery(DIST, frames, scene.width)
+    level = build_game_assets(GAME)
     print(f"scene {scene.size}, tileset {sheet.size} -> {DIST}")
+    print(f"game: {len(level['objects'])} objects, {len(level['cubicles'])} cubicles -> {GAME}")
 
 
 if __name__ == "__main__":

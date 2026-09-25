@@ -1,0 +1,293 @@
+{
+  "meta": {
+    "image": "tileset.png",
+    "size": {
+      "w": 400,
+      "h": 266
+    },
+    "projection": "2:1 isometric, 1 tile = 32x16 px",
+    "anchor": "pixel of world origin (tile back corner, floor level) inside the frame"
+  },
+  "frames": {
+    "floor_carpet": {
+      "x": 4,
+      "y": 4,
+      "w": 33,
+      "h": 21,
+      "anchor": {
+        "x": 16,
+        "y": 0
+      }
+    },
+    "floor_wood": {
+      "x": 41,
+      "y": 4,
+      "w": 33,
+      "h": 21,
+      "anchor": {
+        "x": 16,
+        "y": 0
+      }
+    },
+    "floor_logo_rug_3x3": {
+      "x": 78,
+      "y": 4,
+      "w": 97,
+      "h": 53,
+      "anchor": {
+        "x": 48,
+        "y": 0
+      }
+    },
+    "wall_right_2t": {
+      "x": 179,
+      "y": 4,
+      "w": 39,
+      "h": 84,
+      "anchor": {
+        "x": 0,
+        "y": 67
+      }
+    },
+    "wall_left_2t": {
+      "x": 222,
+      "y": 4,
+      "w": 39,
+      "h": 84,
+      "anchor": {
+        "x": 38,
+        "y": 67
+      }
+    },
+    "wall_right_window": {
+      "x": 265,
+      "y": 4,
+      "w": 39,
+      "h": 84,
+      "anchor": {
+        "x": 0,
+        "y": 67
+      }
+    },
+    "wall_left_logo_poster": {
+      "x": 308,
+      "y": 4,
+      "w": 39,
+      "h": 84,
+      "anchor": {
+        "x": 38,
+        "y": 67
+      }
+    },
+    "wall_left_whiteboard": {
+      "x": 351,
+      "y": 4,
+      "w": 39,
+      "h": 84,
+      "anchor": {
+        "x": 38,
+        "y": 67
+      }
+    },
+    "cubicle_pod_3x3": {
+      "x": 4,
+      "y": 92,
+      "w": 99,
+      "h": 72,
+      "anchor": {
+        "x": 48,
+        "y": 22
+      }
+    },
+    "desk": {
+      "x": 107,
+      "y": 92,
+      "w": 59,
+      "h": 43,
+      "anchor": {
+        "x": 14,
+        "y": 14
+      }
+    },
+    "crt_monitor_logo": {
+      "x": 170,
+      "y": 92,
+      "w": 22,
+      "h": 20,
+      "anchor": {
+        "x": 10,
+        "y": 9
+      }
+    },
+    "crt_monitor_code": {
+      "x": 196,
+      "y": 92,
+      "w": 22,
+      "h": 20,
+      "anchor": {
+        "x": 10,
+        "y": 9
+      }
+    },
+    "crt_monitor_chat": {
+      "x": 222,
+      "y": 92,
+      "w": 22,
+      "h": 20,
+      "anchor": {
+        "x": 10,
+        "y": 9
+      }
+    },
+    "office_chair": {
+      "x": 248,
+      "y": 92,
+      "w": 21,
+      "h": 25,
+      "anchor": {
+        "x": 10,
+        "y": 15
+      }
+    },
+    "filing_cabinet": {
+      "x": 273,
+      "y": 92,
+      "w": 27,
+      "h": 44,
+      "anchor": {
+        "x": 12,
+        "y": 30
+      }
+    },
+    "water_cooler": {
+      "x": 304,
+      "y": 92,
+      "w": 21,
+      "h": 39,
+      "anchor": {
+        "x": 10,
+        "y": 28
+      }
+    },
+    "plant_bush": {
+      "x": 329,
+      "y": 92,
+      "w": 22,
+      "h": 29,
+      "anchor": {
+        "x": 11,
+        "y": 20
+      }
+    },
+    "plant_tall": {
+      "x": 355,
+      "y": 92,
+      "w": 18,
+      "h": 37,
+      "anchor": {
+        "x": 9,
+        "y": 28
+      }
+    },
+    "couch": {
+      "x": 4,
+      "y": 168,
+      "w": 83,
+      "h": 60,
+      "anchor": {
+        "x": 64,
+        "y": 18
+      }
+    },
+    "coffee_table": {
+      "x": 91,
+      "y": 168,
+      "w": 49,
+      "h": 32,
+      "anchor": {
+        "x": 26,
+        "y": 8
+      }
+    },
+    "copier": {
+      "x": 144,
+      "y": 168,
+      "w": 35,
+      "h": 35,
+      "anchor": {
+        "x": 16,
+        "y": 17
+      }
+    },
+    "partition": {
+      "x": 183,
+      "y": 168,
+      "w": 51,
+      "h": 48,
+      "anchor": {
+        "x": 2,
+        "y": 22
+      }
+    },
+    "mascot_blue": {
+      "x": 238,
+      "y": 168,
+      "w": 20,
+      "h": 16,
+      "anchor": {
+        "x": 10,
+        "y": 15
+      }
+    },
+    "mascot_pink": {
+      "x": 262,
+      "y": 168,
+      "w": 20,
+      "h": 16,
+      "anchor": {
+        "x": 10,
+        "y": 15
+      }
+    },
+    "mascot_orange": {
+      "x": 286,
+      "y": 168,
+      "w": 20,
+      "h": 16,
+      "anchor": {
+        "x": 10,
+        "y": 15
+      }
+    },
+    "poster_banner": {
+      "x": 310,
+      "y": 168,
+      "w": 76,
+      "h": 28,
+      "anchor": {
+        "x": 38,
+        "y": 27
+      }
+    },
+    "poster_logo": {
+      "x": 4,
+      "y": 232,
+      "w": 30,
+      "h": 30,
+      "anchor": {
+        "x": 15,
+        "y": 29
+      }
+    },
+    "poster_mascots": {
+      "x": 38,
+      "y": 232,
+      "w": 58,
+      "h": 20,
+      "anchor": {
+        "x": 29,
+        "y": 19
+      }
+    }
+  }
+}

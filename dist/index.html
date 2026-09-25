@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dlicom Pixel Office — isometric tileset</title>
+  <style>
+    :root { color-scheme: dark; --blue: #2a37b7; --cyan: #67c6dd; }
+    body { margin: 0; background: #010101; color: #e8e6f0;
+           font: 14px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    header { padding: 20px 24px; background: linear-gradient(180deg, #000, var(--blue)); }
+    h1 { margin: 0; font-size: 20px; } h2 { margin: 32px 24px 12px; font-size: 16px; color: var(--cyan); }
+    img { image-rendering: pixelated; }
+    .scene { padding: 0 24px; } .scene img { width: min(100%, 2080px); height: auto; border: 2px solid #1e2780; }
+    .grid { display: flex; flex-wrap: wrap; gap: 16px; padding: 0 24px 40px; align-items: flex-end; }
+    figure { margin: 0; padding: 12px; background: #11142e; border: 1px solid #1e2780; text-align: center; }
+    figcaption { margin-top: 8px; color: #b9bce0; } small { color: #6f74a8; }
+  </style>
+</head>
+<body>
+  <header><h1>Dlicom Pixel Office</h1><div>2.5D isometric &middot; 16-bit SNES style &middot; 32&times;16 px tiles</div></header>
+  <h2>Scene</h2>
+  <div class="scene"><img src="office_scene.png" width="2080" alt="Isometric pixel-art Dlicom office"></div>
+  <h2>Tileset (28 pieces &middot; tileset.png + tileset.json)</h2>
+  <div class="grid">
+      <figure><img src="tiles/floor_carpet.png" width="99" height="63" alt="floor_carpet"><figcaption>floor_carpet<br><small>33&times;21</small></figcaption></figure>
+      <figure><img src="tiles/floor_wood.png" width="99" height="63" alt="floor_wood"><figcaption>floor_wood<br><small>33&times;21</small></figcaption></figure>
+      <figure><img src="tiles/floor_logo_rug_3x3.png" width="291" height="159" alt="floor_logo_rug_3x3"><figcaption>floor_logo_rug_3x3<br><small>97&times;53</small></figcaption></figure>
+      <figure><img src="tiles/wall_right_2t.png" width="117" height="252" alt="wall_right_2t"><figcaption>wall_right_2t<br><small>39&times;84</small></figcaption></figure>
+      <figure><img src="tiles/wall_left_2t.png" width="117" height="252" alt="wall_left_2t"><figcaption>wall_left_2t<br><small>39&times;84</small></figcaption></figure>
+      <figure><img src="tiles/wall_right_window.png" width="117" height="252" alt="wall_right_window"><figcaption>wall_right_window<br><small>39&times;84</small></figcaption></figure>
+      <figure><img src="tiles/wall_left_logo_poster.png" width="117" height="252" alt="wall_left_logo_poster"><figcaption>wall_left_logo_poster<br><small>39&times;84</small></figcaption></figure>
+      <figure><img src="tiles/wall_left_whiteboard.png" width="117" height="252" alt="wall_left_whiteboard"><figcaption>wall_left_whiteboard<br><small>39&times;84</small></figcaption></figure>
+      <figure><img src="tiles/cubicle_pod_3x3.png" width="297" height="216" alt="cubicle_pod_3x3"><figcaption>cubicle_pod_3x3<br><small>99&times;72</small></figcaption></figure>
+      <figure><img src="tiles/desk.png" width="177" height="129" alt="desk"><figcaption>desk<br><small>59&times;43</small></figcaption></figure>
+      <figure><img src="tiles/crt_monitor_logo.png" width="66" height="60" alt="crt_monitor_logo"><figcaption>crt_monitor_logo<br><small>22&times;20</small></figcaption></figure>
+      <figure><img src="tiles/crt_monitor_code.png" width="66" height="60" alt="crt_monitor_code"><figcaption>crt_monitor_code<br><small>22&times;20</small></figcaption></figure>
+      <figure><img src="tiles/crt_monitor_chat.png" width="66" height="60" alt="crt_monitor_chat"><figcaption>crt_monitor_chat<br><small>22&times;20</small></figcaption></figure>
+      <figure><img src="tiles/office_chair.png" width="63" height="75" alt="office_chair"><figcaption>office_chair<br><small>21&times;25</small></figcaption></figure>
+      <figure><img src="tiles/filing_cabinet.png" width="81" height="132" alt="filing_cabinet"><figcaption>filing_cabinet<br><small>27&times;44</small></figcaption></figure>
+      <figure><img src="tiles/water_cooler.png" width="63" height="117" alt="water_cooler"><figcaption>water_cooler<br><small>21&times;39</small></figcaption></figure>
+      <figure><img src="tiles/plant_bush.png" width="66" height="87" alt="plant_bush"><figcaption>plant_bush<br><small>22&times;29</small></figcaption></figure>
+      <figure><img src="tiles/plant_tall.png" width="54" height="111" alt="plant_tall"><figcaption>plant_tall<br><small>18&times;37</small></figcaption></figure>
+      <figure><img src="tiles/couch.png" width="249" height="180" alt="couch"><figcaption>couch<br><small>83&times;60</small></figcaption></figure>
+      <figure><img src="tiles/coffee_table.png" width="147" height="96" alt="coffee_table"><figcaption>coffee_table<br><small>49&times;32</small></figcaption></figure>
+      <figure><img src="tiles/copier.png" width="105" height="105" alt="copier"><figcaption>copier<br><small>35&times;35</small></figcaption></figure>
+      <figure><img src="tiles/partition.png" width="153" height="144" alt="partition"><figcaption>partition<br><small>51&times;48</small></figcaption></figure>
+      <figure><img src="tiles/mascot_blue.png" width="60" height="48" alt="mascot_blue"><figcaption>mascot_blue<br><small>20&times;16</small></figcaption></figure>
+      <figure><img src="tiles/mascot_pink.png" width="60" height="48" alt="mascot_pink"><figcaption>mascot_pink<br><small>20&times;16</small></figcaption></figure>
+      <figure><img src="tiles/mascot_orange.png" width="60" height="48" alt="mascot_orange"><figcaption>mascot_orange<br><small>20&times;16</small></figcaption></figure>
+      <figure><img src="tiles/poster_banner.png" width="228" height="84" alt="poster_banner"><figcaption>poster_banner<br><small>76&times;28</small></figcaption></figure>
+      <figure><img src="tiles/poster_logo.png" width="90" height="90" alt="poster_logo"><figcaption>poster_logo<br><small>30&times;30</small></figcaption></figure>
+      <figure><img src="tiles/poster_mascots.png" width="174" height="60" alt="poster_mascots"><figcaption>poster_mascots<br><small>58&times;20</small></figcaption></figure>
+  </div>
+</body>
+</html>

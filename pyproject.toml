@@ -1,0 +1,6 @@
+[project]
+name = "dlicom-pixel-office"
+version = "0.1.0"
+description = "Isometric 16-bit pixel-art retro office tileset in the Dlicom brand"
+requires-python = ">=3.10"
+dependencies = ["pillow>=10.0"]

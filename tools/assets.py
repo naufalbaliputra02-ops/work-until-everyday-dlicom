@@ -120,10 +120,19 @@ MASCOT_PAL = {
     "orange": {"O": "#4d1f05", "D": "#9c4508", "M": "#d9690e", "L": "#f29a45", "W": "#ffffff", "K": "#140a05", "R": "#d7263d"},
 }
 
+# Last three rows of every mascot are its feet; walking swaps in a raised foot.
+FEET_FRAMES = {
+    "idle": [".....OMMO..OMMO.....", ".....ODDO..ODDO.....", "......OO....OO......"],
+    "stepL": [".....OMMO..ODDO.....", ".....ODDO...OO......", "......OO............"],
+    "stepR": [".....ODDO..OMMO.....", "......OO...ODDO.....", "............OO......"],
+}
+MASCOT_FRAMES = list(FEET_FRAMES)
+
 
 @lru_cache(None)
-def mascot(name: str) -> Image.Image:
-    return from_ascii(MASCOT_ROWS[name], MASCOT_PAL[name])
+def mascot(name: str, frame: str = "idle") -> Image.Image:
+    rows = MASCOT_ROWS[name][:-3] + FEET_FRAMES[frame]
+    return from_ascii(rows, MASCOT_PAL[name])
 
 
 # --------------------------------------------------------------------------

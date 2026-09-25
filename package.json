@@ -1,0 +1,11 @@
+{
+  "name": "work-until-everyday-dlicom",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "uv run python tools/build.py",
+    "test": "node --test \"game/test/*.test.js\"",
+    "deploy": "tools/deploy-pages.sh",
+    "start": "python3 -m http.server ${PORT:-3000} --directory game"
+  }
+}

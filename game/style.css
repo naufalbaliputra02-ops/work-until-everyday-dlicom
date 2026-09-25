@@ -17,6 +17,8 @@
 html, body {
   margin: 0;
   height: 100%;
+  overscroll-behavior: none;
+  touch-action: manipulation;
   background: radial-gradient(120% 90% at 50% 110%, var(--blue) 0%, var(--navy) 45%, var(--black) 80%);
   color: var(--ink);
   font: 14px/1.4 var(--px);
@@ -32,10 +34,11 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px;
+  padding: max(4px, env(safe-area-inset-top)) max(4px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-left));
 }
 
 #stage { position: relative; line-height: 0; }
+#viewport { position: relative; overflow: hidden; box-shadow: 0 0 0 2px #1e2780, 0 12px 40px #0008; touch-action: none; }
 
 canvas#game {
   display: block;
@@ -43,7 +46,8 @@ canvas#game {
   image-rendering: crisp-edges;
   touch-action: none;
   cursor: pointer;
-  box-shadow: 0 0 0 2px #1e2780, 0 12px 40px #0008;
+  transform-origin: 0 0;
+  will-change: transform;
 }
 
 /* ---- HUD ---------------------------------------------------------------- */
@@ -177,9 +181,125 @@ h2.bad { color: #ff5a6a; }
 @keyframes blink { 50% { opacity: 0.3; } }
 @keyframes hop { 50% { transform: translateY(-3px); } }
 
+/* ---- quests / tutorial / toasts ---------------------------------------- */
+.coins { color: #ffcf3a; font-weight: 700; }
+.coins::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px;
+  background: #ffcf3a; border: 2px solid #5a3a05; border-radius: 50%; box-sizing: border-box; }
+.icon-btn.wide { width: auto; padding: 0 8px; font-size: 12px; }
+.icon-btn.wide b { color: #ffcf3a; }
+.icon-btn.on { border-color: var(--cyan); color: var(--cyan); }
+.icon-btn[hidden] { display: none; }
+
+#quest-panel {
+  position: absolute; top: 6px; left: 6px; width: 212px; z-index: 2;
+  padding: 6px 8px; line-height: 1.3; font-size: 11px;
+  background: #0a1041e0; border: 2px solid #000; box-shadow: 0 0 0 2px #1e2780;
+  pointer-events: none;
+}
+#quest-panel[hidden] { display: none; }
+.qp-head { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 4px; color: var(--cyan); }
+.qp-head .rank { color: #ffe27a; }
+#quest-list, .quest-summary { margin: 0; padding: 0; list-style: none; }
+#quest-list li, .quest-summary li { display: grid; grid-template-columns: 12px 1fr auto; gap: 6px; align-items: center; margin: 3px 0; }
+.q-check { color: #6f74a8; font-weight: 700; }
+.q-text { position: relative; padding-bottom: 3px; }
+.q-text i { position: absolute; left: 0; bottom: 0; height: 2px; width: var(--p); background: var(--cyan); }
+.q-text::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #ffffff18; }
+.q-prog { color: #c9cbe8; font-weight: 700; }
+li.done .q-check { color: #5bd36b; }
+li.done .q-text { color: #9aa0d8; text-decoration: line-through; }
+li.done .q-prog { color: #ffcf3a; }
+.quest-summary { margin: 6px 0 12px; text-align: left; font-size: 13px; }
+.quest-summary[hidden] { display: none; }
+
+#tutor {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 3;
+  width: min(460px, calc(100% - 16px)); display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; line-height: 1.35; font-size: 13px;
+  background: #000e; border: 2px solid #000; box-shadow: 0 0 0 2px var(--orange), 4px 4px 0 2px #000;
+  animation: pop 0.25s steps(3);
+}
+#tutor[hidden] { display: none; }
+.tutor-step { flex: none; padding: 4px 6px; background: var(--orange); color: #000; font-weight: 700; }
+.tutor-body { flex: 1; }
+.tutor-body b { display: block; color: #ffe27a; }
+.btn.tiny { width: auto; margin: 0; padding: 4px 8px; font-size: 11px; box-shadow: 0 0 0 2px #1e2780; }
+
+#toasts { position: absolute; top: 8px; right: 8px; z-index: 4; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; pointer-events: none; line-height: 1.3; }
+.toast { max-width: 280px; padding: 6px 10px; font-size: 12px; background: #000e; border: 2px solid #000; box-shadow: 0 0 0 2px var(--blue); animation: slidein 0.2s steps(3); transition: opacity 0.4s; }
+.toast b { color: #fff; }
+.toast.good { box-shadow: 0 0 0 2px #5bd36b; }
+.toast.rank { box-shadow: 0 0 0 2px #ffe27a; }
+.toast.coffee { box-shadow: 0 0 0 2px var(--orange); }
+.toast.viral { box-shadow: 0 0 0 2px #ffcf3a; }
+.toast.viral b { color: #ffcf3a; }
+.toast.out { opacity: 0; }
+
+/* ---- joystick ------------------------------------------------------------ */
+#joy {
+  position: fixed; z-index: 4; left: max(18px, env(safe-area-inset-left)); bottom: max(18px, env(safe-area-inset-bottom));
+  width: 116px; height: 116px; border-radius: 50%;
+  background: radial-gradient(circle, #2a37b755 0 55%, #0a104188 56%);
+  border: 3px solid #67c6dd88; touch-action: none; opacity: 0.8;
+}
+#joy[hidden] { display: none; }
+#joy.active { opacity: 1; border-color: var(--cyan); }
+#joy .knob {
+  position: absolute; left: 50%; top: 50%; width: 48px; height: 48px; margin: -24px 0 0 -24px; border-radius: 50%;
+  background: var(--cyan); border: 3px solid #0a1041; box-shadow: inset -4px -4px 0 #4aa8c4, inset 4px 4px 0 #b9ecf7;
+}
+
+/* ---- how to play / day end / shop --------------------------------------- */
+.panel.wide { width: min(720px, 100%); }
+.row { display: flex; gap: 8px; }
+.row .btn { flex: 1; }
+.howto-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin: 12px 0 4px; text-align: left; }
+.howto-card { display: flex; gap: 10px; padding: 8px; background: #000a; border: 2px solid #1e2780; font-size: 12px; line-height: 1.35; }
+.howto-card b { color: var(--cream); }
+.howto-card p { margin: 2px 0 0; color: #c9cbe8; }
+.howto-card p b { color: #fff; }
+.hc-icon { flex: none; width: 48px; display: flex; align-items: flex-start; justify-content: center; font-size: 26px; color: #ff5a8a; line-height: 1; }
+.px-icon { image-rendering: pixelated; max-width: 48px; height: auto; }
+h3 { margin: 10px 0 4px; font-size: 13px; letter-spacing: 0.1em; color: var(--cyan); text-align: left; }
+.career { display: grid; gap: 4px; margin: 8px 0; padding: 8px; text-align: left; background: #000a; border: 2px solid #1e2780; font-size: 13px; }
+.career b { color: #ffe27a; }
+.career small { color: #9aa0d8; }
+.career-bar { display: block; height: 8px; background: #2b2f55; border: 2px solid #000; }
+.career-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+.shop { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
+.shop-item { display: flex; flex-direction: column; gap: 2px; padding: 8px; text-align: left; font: inherit; font-size: 12px; color: var(--ink); background: #000a; border: 2px solid #1e2780; cursor: pointer; }
+.shop-item small { color: #9aa0d8; line-height: 1.2; }
+.shop-item .pips { color: var(--cyan); letter-spacing: 2px; }
+.shop-item .price { margin-top: 2px; color: #ffcf3a; font-weight: 700; }
+.shop-item:not(:disabled):hover { border-color: var(--cyan); }
+.shop-item:disabled { opacity: 0.45; cursor: default; }
+.hint-install { margin: 8px 0 0; font-size: 11px; color: #9aa0d8; }
+.rotate-icon { font-size: 48px; color: var(--cyan); animation: spin 1.6s steps(8) infinite; }
+
+@keyframes pop { from { transform: translateX(-50%) scale(0.8); } }
+@keyframes slidein { from { transform: translateX(20px); opacity: 0; } }
+@keyframes spin { to { transform: rotate(90deg); } }
+
+/* phones: landscape is short, portrait is narrow */
+@media (max-height: 500px) {
+  #hud { padding: 2px 6px; font-size: 11px; gap: 2px 8px; }
+  .score { font-size: 15px; }
+  .hearts { font-size: 14px; }
+  .icon-btn { height: 24px; }
+  .overlay { align-items: flex-start; }
+  .panel { padding: 12px 14px; }
+  .logo { width: 40px; height: 40px; }
+  h1 { font-size: 20px; }
+  #quest-panel { width: 190px; font-size: 10px; }
+  #joy { width: 104px; height: 104px; }
+}
+
 @media (max-width: 560px) {
   #hud { font-size: 12px; gap: 4px 8px; padding: 4px 6px; }
   .score { font-size: 16px; }
   .energy { width: 48px; }
   h1 { font-size: 22px; }
+  .hud-group.buttons { width: 100%; justify-content: flex-end; }
+  #quest-panel { width: 176px; font-size: 10px; }
+  .howto-grid { grid-template-columns: 1fr; }
 }

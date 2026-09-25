@@ -337,6 +337,9 @@ def build_game_assets(out_dir: Path):
 
     for src in ("dlicom-logo.png", "dlicom-banner.png"):
         (out_dir / src).write_bytes((A.BRAND / src).read_bytes())
+    logo = Image.open(A.BRAND / "dlicom-logo.png").convert("RGB")
+    for size in (192, 512):
+        logo.resize((size, size), Image.Resampling.LANCZOS).save(out_dir / f"icon-{size}.png")
 
     cubicles = [
         {

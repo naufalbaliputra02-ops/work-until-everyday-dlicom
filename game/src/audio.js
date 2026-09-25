@@ -33,7 +33,10 @@ function tone(freq, start, dur, { type = "square", vol = 0.06, slide = 0 } = {})
 }
 
 const SFX = {
-  spawn: () => { tone(880, 0, 0.07); tone(1320, 0.07, 0.09); },
+  spawn: (e) => {
+    if (e.viral) [0, 7, 12, 19].forEach((s, i) => tone(660 * Math.pow(2, s / 12), i * 0.05, 0.07, { type: "triangle", vol: 0.07 }));
+    else { tone(880, 0, 0.07); tone(1320, 0.07, 0.09); }
+  },
   done: (e) => {
     const base = 523 * Math.pow(2, Math.min(e.combo - 1, 7) / 12);
     [0, 4, 7, 12].forEach((s, i) => tone(base * Math.pow(2, s / 12), i * 0.05, 0.08));
@@ -44,6 +47,11 @@ const SFX = {
   dayend: () => { [0, 4, 7, 12, 7, 12].forEach((s, i) => tone(392 * Math.pow(2, s / 12), i * 0.11, 0.12)); },
   gameover: () => { [7, 4, 0, -5].forEach((s, i) => tone(330 * Math.pow(2, s / 12), i * 0.16, 0.2, { type: "triangle", vol: 0.08 })); },
   click: () => tone(660, 0, 0.04),
+  quest: () => { [0, 5, 9, 12, 17].forEach((s, i) => tone(587 * Math.pow(2, s / 12), i * 0.06, 0.09, { type: "triangle", vol: 0.07 })); },
+  rank: () => { [0, 4, 7, 12, 16, 19, 24].forEach((s, i) => tone(392 * Math.pow(2, s / 12), i * 0.07, 0.12)); },
+  coffee: () => { tone(300, 0, 0.12, { slide: 600, vol: 0.05 }); tone(900, 0.12, 0.08, { type: "triangle" }); },
+  buy: () => { tone(988, 0, 0.05); tone(1319, 0.05, 0.1); },
+  full: () => { tone(1568, 0, 0.1, { type: "triangle", vol: 0.05 }); },
 };
 
 export function play(evt) {
